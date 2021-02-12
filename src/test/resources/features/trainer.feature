@@ -41,16 +41,25 @@ Feature: Training for Lingo
 
     Examples:
     | word  | guess  | feedback                                             |
-    | Baard | Bergen | INVALID, INVALID, INVALID, INVALID, INVALID, INVALID |
-    | Baard | Bonje  | CORRECT, ABSENT, ABSENT, ABSENT, ABSENT              |
-    | Baard | Barst  | CORRECT, CORRECT, PRESENT, ABSENT, ABSENT            |
-    | Baard | Draad  | ABSENT, PRESENT, CORRECT, PRESENT, CORRECT           |
-    | Baard | Baard  | CORRECT, CORRECT, CORRECT, CORRECT, CORRECT          |
+    | BAARD | BERGEN | INVALID, INVALID, INVALID, INVALID, INVALID, INVALID |
+    | BAARD | BONJE  | CORRECT, ABSENT, ABSENT, ABSENT, ABSENT              |
+    | BAARD | BARST  | CORRECT, CORRECT, PRESENT, ABSENT, ABSENT            |
+    | BAARD | DRAAD  | ABSENT, PRESENT, CORRECT, PRESENT, CORRECT           |
+    | BAARD | BAARD  | CORRECT, CORRECT, CORRECT, CORRECT, CORRECT          |
 
     Given I have started a round
     And the round is not over
     When I guess correct
-    Then my score should be increased
+    And I have guessed "<attempts>" times
+    Then my score should increase by "<score>"
+
+    Examples:
+    | attempts | score |
+    | 1        | 25    |
+    | 2        | 20    |
+    | 3        | 15    |
+    | 4        | 10    |
+    | 5        | 5     |
 
     Given I have started a round
     And the round is not over
@@ -59,7 +68,5 @@ Feature: Training for Lingo
     Then the game should be over
 
     Given I have started a round
-    And the round is not over
-    When I guess a word that has already been guessed
-    Then my guesses shouldn't increase
-    And I shouldn't receive feedback
+    And the word has already been guessed
+    Then I should get another word
