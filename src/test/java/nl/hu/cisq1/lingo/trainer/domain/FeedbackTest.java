@@ -76,9 +76,9 @@ class FeedbackTest {
 
     @ParameterizedTest
     @MethodSource("provideAllWrongHintExamples")
-    @DisplayName("Hint only contains dots if all letters are different")
-    void hintOnlyContainsDots(Feedback feedback) {
-        assertTrue(feedback.giveHint().getValue().stream().allMatch(hint -> hint.equals('.')));
+    @DisplayName("Hint only contains dots if all letters are different except first letter")
+    void hintOnlyContainsDots(Feedback feedback, List<Character> expectedHint) {
+        assertEquals(expectedHint, feedback.giveHint().getValue());
     }
 
     @ParameterizedTest
@@ -104,9 +104,9 @@ class FeedbackTest {
 
     static Stream<Arguments> provideAllWrongHintExamples() {
         return Stream.of(
-                Arguments.of(new Feedback("appel", "woord")),
-                Arguments.of(new Feedback("deur", "pink")),
-                Arguments.of(new Feedback("de", "op"))
+                Arguments.of(new Feedback("appel", "woord"), List.of('w','.','.','.','.')),
+                Arguments.of(new Feedback("deur", "pink") , List.of('p','.','.','.')),
+                Arguments.of(new Feedback("de", "op"), List.of('o','.'))
         );
     }
 
@@ -120,7 +120,7 @@ class FeedbackTest {
 
     static Stream<Arguments> provideRoundHintExamples() {
         return Stream.of(
-                Arguments.of(new Feedback("woord", "appel"), ".....", null),
+                Arguments.of(new Feedback("woord", "appel"), "a....", null),
                 Arguments.of(new Feedback("anger", "appel"), "a..e.", new Hint(List.of('.', '.', '.', '.', '.'))),
                 Arguments.of(new Feedback("kupus", "appel"), "a.pe.", new Hint(List.of('a', '.', '.', 'e', '.'))),
                 Arguments.of(new Feedback("appel", "appel"), "appel", new Hint(List.of('a', '.', 'p', 'e', '.')))

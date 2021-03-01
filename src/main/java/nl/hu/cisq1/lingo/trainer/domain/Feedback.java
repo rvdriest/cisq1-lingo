@@ -22,13 +22,12 @@ public class Feedback {
 
     public Hint giveHint(Hint previousHint) {
         List<Character> hint = new ArrayList<>();
-        for(int i = 0; i < attempt.length(); i++) {
+        hint.add(wordToGuess.charAt(0));
+        for(int i = 1; i < attempt.length(); i++) {
             if(this.marks.get(i).equals(Mark.CORRECT)) {
                 hint.add(attempt.charAt(i));
-            }else if(!previousHint.getValue().get(i).equals('.')) {
+            }else{
                 hint.add(previousHint.getValue().get(i));
-            } else {
-                hint.add('.');
             }
         }
         return new Hint(hint);
@@ -36,7 +35,8 @@ public class Feedback {
 
     public Hint giveHint() {
         List<Character> hint = new ArrayList<>();
-        for(int i = 0; i < attempt.length(); i++) {
+        hint.add(wordToGuess.charAt(0));
+        for(int i = 1; i < attempt.length(); i++) {
             if(this.marks.get(i).equals(Mark.CORRECT)) {
                 hint.add(attempt.charAt(i));
             } else {
