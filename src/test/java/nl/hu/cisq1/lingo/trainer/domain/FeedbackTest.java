@@ -1,7 +1,6 @@
 package nl.hu.cisq1.lingo.trainer.domain;
 
 import nl.hu.cisq1.lingo.trainer.domain.exception.InvalidFeedbackException;
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -9,7 +8,6 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import java.util.List;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -75,55 +73,21 @@ class FeedbackTest {
     }
 
     @ParameterizedTest
-    @MethodSource("provideAllWrongHintExamples")
-    @DisplayName("Hint only contains dots if all letters are different except first letter")
-    void hintOnlyContainsDots(Feedback feedback, List<Character> expectedHint) {
-        assertEquals(expectedHint, feedback.giveHint().getValue());
+    @MethodSource("provideFeedbackMarks")
+    void testMarks(Feedback feedback, List<Mark> expectedMarks) {
+        assertEquals(expectedMarks, feedback.getMarks());
     }
 
-    @ParameterizedTest
-    @MethodSource("provideCorrectHintExamples")
-    @DisplayName("Hint doesn't contain any dots if all letters are the same")
-    void hintNoneContainsDots(Feedback feedback) {
-        assertTrue(feedback.giveHint().getValue().stream().noneMatch(hint -> hint.equals('.')));
-    }
-
-    @ParameterizedTest
-    @MethodSource("provideRoundHintExamples")
-    @DisplayName("Hint doesn't contain any dots if all letters are the same")
-    void roundHints(Feedback feedback, String hint, Hint previousHint) {
-        String newHint;
-        if(previousHint != null) {
-            newHint = feedback.giveHint(previousHint).getValue().stream().map(String::valueOf).collect(Collectors.joining());
-        }else {
-            newHint = feedback.giveHint().getValue().stream().map(String::valueOf).collect(Collectors.joining());
-        }
-
-        assertEquals(newHint, hint);
-    }
-
-    static Stream<Arguments> provideAllWrongHintExamples() {
+    static Stream<Arguments> provideFeedbackMarks() {
         return Stream.of(
-                Arguments.of(new Feedback("appel", "woord"), List.of('w','.','.','.','.')),
-                Arguments.of(new Feedback("deur", "pink") , List.of('p','.','.','.')),
-                Arguments.of(new Feedback("de", "op"), List.of('o','.'))
-        );
-    }
-
-    static Stream<Arguments> provideCorrectHintExamples() {
-        return Stream.of(
-                Arguments.of(new Feedback("appel", "ApPel")),
-                Arguments.of(new Feedback("deur", "deur")),
-                Arguments.of(new Feedback("de", "de"))
-        );
-    }
-
-    static Stream<Arguments> provideRoundHintExamples() {
-        return Stream.of(
-                Arguments.of(new Feedback("woord", "appel"), "a....", null),
-                Arguments.of(new Feedback("anger", "appel"), "a..e.", new Hint(List.of('.', '.', '.', '.', '.'))),
-                Arguments.of(new Feedback("kupus", "appel"), "a.pe.", new Hint(List.of('a', '.', '.', 'e', '.'))),
-                Arguments.of(new Feedback("appel", "appel"), "appel", new Hint(List.of('a', '.', 'p', 'e', '.')))
+                Arguments.of(new Feedback("BONJE", "BAARD"), List.of(Mark.CORRECT, Mark.ABSENT, Mark.ABSENT, Mark.ABSENT, Mark.ABSENT)),
+                Arguments.of(new Feedback("BARST", "BAARD"), List.of(Mark.CORRECT, Mark.CORRECT, Mark.PRESENT, Mark.ABSENT, Mark.ABSENT)),
+                Arguments.of(new Feedback("DRAAD", "BAADD"), List.of(Mark.PRESENT, Mark.ABSENT, Mark.CORRECT, Mark.PRESENT, Mark.CORRECT)),
+                Arguments.of(new Feedback("ZWAAR", "BAROK"), List.of(Mark.ABSENT, Mark.ABSENT, Mark.PRESENT, Mark.ABSENT, Mark.PRESENT)),
+                Arguments.of(new Feedback("APAALM", "AARDEN"), List.of(Mark.CORRECT, Mark.ABSENT, Mark.PRESENT, Mark.ABSENT, Mark.ABSENT, Mark.ABSENT)),
+                Arguments.of(new Feedback("BAARD", "BAARD"), List.of(Mark.CORRECT, Mark.CORRECT, Mark.CORRECT, Mark.CORRECT, Mark.CORRECT)),
+                Arguments.of(new Feedback("ARARA", "BAROK"), List.of(Mark.PRESENT, Mark.PRESENT, Mark.ABSENT, Mark.ABSENT, Mark.ABSENT)),
+                Arguments.of(new Feedback("BAROK", "ARARA"), List.of(Mark.ABSENT, Mark.PRESENT, Mark.PRESENT, Mark.ABSENT, Mark.ABSENT))
         );
     }
 }
