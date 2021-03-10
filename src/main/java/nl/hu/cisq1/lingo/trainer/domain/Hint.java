@@ -1,13 +1,18 @@
 package nl.hu.cisq1.lingo.trainer.domain;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 public class Hint {
     private final List<Character> value;
 
     public Hint(List<Character> value) {
-        this.value = value;
+        this.value = new ArrayList<>();
+        for(Character character : value) {
+            this.value.add(character.toString().toUpperCase().charAt(0));
+        }
     }
 
     public List<Character> getValue() {
@@ -25,5 +30,10 @@ public class Hint {
     @Override
     public int hashCode() {
         return Objects.hash(value);
+    }
+
+    @Override
+    public String toString() {
+        return value.stream().map(String::valueOf).collect(Collectors.joining());
     }
 }

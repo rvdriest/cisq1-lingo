@@ -2,9 +2,7 @@ package nl.hu.cisq1.lingo.trainer.domain;
 
 import nl.hu.cisq1.lingo.trainer.domain.exception.InvalidFeedbackException;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class Feedback {
@@ -20,47 +18,61 @@ public class Feedback {
         setMarks();
     }
 
-    public Hint giveHint(Hint previousHint) {
-        List<Character> hint = new ArrayList<>();
-        hint.add(wordToGuess.charAt(0));
-        for(int i = 1; i < attempt.length(); i++) {
-            if(this.marks.get(i).equals(Mark.CORRECT)) {
-                hint.add(attempt.charAt(i));
-            }else{
-                hint.add(previousHint.getValue().get(i));
-            }
-        }
-        return new Hint(hint);
-    }
-
-    public Hint giveHint() {
-        List<Character> hint = new ArrayList<>();
-        hint.add(wordToGuess.charAt(0));
-        for(int i = 1; i < attempt.length(); i++) {
-            if(this.marks.get(i).equals(Mark.CORRECT)) {
-                hint.add(attempt.charAt(i));
-            } else {
-                hint.add('.');
-            }
-        }
-        return new Hint(hint);
-    }
-
+    //TODO: Let erop dat een letter niet ten onrechte als present wordt aangegeven als deze al eerder is aangemerkt als present of correct!
     private void setMarks() {
-        List<Mark> marks = new ArrayList<>();
-        List<Character> attemptCharacters = attempt.chars().mapToObj(e -> (char)e).collect(Collectors.toList());
-        List<Character> wordToGuessCharacters = wordToGuess.chars().mapToObj(e -> (char)e).collect(Collectors.toList());
+        List<Mark> marks = new ArrayList<>(attempt.length());
         for(int i = 0; i < attempt.length(); i++) {
-            char attemptChar = attemptCharacters.get(i);
-            if(attemptChar == wordToGuessCharacters.get(i)) {
-                marks.add(Mark.CORRECT);
-            }else if(wordToGuessCharacters.stream().anyMatch(character -> character.equals(attemptChar))) {
-                marks.add(Mark.PRESENT);
-            } else {
-                marks.add(Mark.ABSENT);
-            }
+            marks.add(null);
         }
+        Word attemptWord = new Word(attempt);
+        Word wordToGuessWord = new Word(wordToGuess);
+
+        List<Integer> attemptPositionsDone = new ArrayList<>();
+
+        for(int i = 0; i < attemptWord.getLetters().size(); i++){
+            Letter letter = attemptWord.getLetters().get(i);
+            if(attemptPositionsDone.contains(letter.getPosition())) continue;
+            List<Integer> wordToGuessLetterPositions = wordToGuessWord.getPositions(letter.getLetter());
+            if (wordToGuessLetterPositions.size() > 0){
+                List<Integer> attemptLetterPositions = attemptWord.getPositions(letter.getLetter());
+                attemptLetterPositions.removeAll(attemptPositionsDone);
+                if(attemptLetterPositions.size() > wordToGuessLetterPositions.size()) {
+                    Collections.reverse(attemptLetterPositions);
+                    for(int attemptLetterPosition : attemptLetterPositions) {
+                        if(!wordToGuessLetterPositions.contains(attemptLetterPosition)) {
+                            marks.set(attemptLetterPosition, Mark.ABSENT);
+                            attemptPositionsDone.add(attemptLetterPosition);
+                            i--;
+                            break;
+                        }
+                    }
+                }
+                else if (wordToGuessLetterPositions.stream().anyMatch(x -> x == letter.getPosition())) {
+                    marks.set(letter.getPosition(), Mark.CORRECT);
+                } else {
+                    marks.set(letter.getPosition(), Mark.PRESENT);
+                }
+            } else {
+                marks.set(letter.getPosition(), Mark.ABSENT);
+            }
+
+        }
+
         this.marks = marks;
+    }
+
+//    private HashMap<Integer, Character> sortHashMapByValues(
+//            HashMap<Integer, String> passedMap) {
+//        return passedMap.entrySet().stream()
+//                .sorted((k1, k2) -> -k1.getValue().compareTo(k2.getValue())).;
+//    }
+
+    public String getAttempt() {
+        return attempt;
+    }
+
+    public List<Mark> getMarks() {
+        return marks;
     }
 
     public boolean isWordGuessed() {
